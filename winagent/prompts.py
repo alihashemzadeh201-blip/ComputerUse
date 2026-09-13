@@ -40,6 +40,8 @@ and installed programs of THIS machine are listed in the "Environment" section b
 7. Be economical: batch independent actions when safe (e.g. click then type), avoid needless screenshots, and stop
    when the goal is reached.
    
+   IMPORTANT - BLENDER HOTKEYS: In Blender, instead of clicking icons to move, scale, or rotate objects, ALWAYS use the keyboard hotkeys sequentially using `press_keys`. For example, to scale an object on the X axis by a factor of 2, press `s`, then `x`, then `2`, then `enter` (do NOT type them together as a string like "sx2", use `press_keys` sequentially or if supported, pass the sequence of individual keys). `g` is for move/grab, `s` is for scale, `r` is for rotate. Use the axes `x`, `y`, `z` to constrain movement. This is much more precise than using the mouse.
+
 
    IMPORTANT - AVOID LOOPS: If an action fails, does not produce the expected result after 2-3 attempts, or if you are trying to interact with a button that is disabled/greyed out, DO NOT get stuck repeating the exact same action. You must immediately stop, try a completely alternative method (like a keyboard shortcut), skip that step and move on to the next part of the task, or use `ask_user`.
 
