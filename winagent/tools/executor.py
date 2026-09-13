@@ -589,6 +589,51 @@ class ToolExecutor:
                             "Verify with the screenshot before continuing; do not retry the launch blindly.")
         return ToolResult(call, True, data)
 
+    def _t_fetch_web_content(self, call: ToolCall, a: dict[str, Any]) -> ToolResult:
+        url = a.get("url") or a.get("value")
+        if not url:
+            raise ValueError("'url' is required")
+        import urllib.request
+        from urllib.error import URLError, HTTPError
+        import json
+        
+        if not url.startswith(("http://", "https://")):
+            url = "https://" + url
+            
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
+            with urllib.request.urlopen(req, timeout=15) as response:
+                content_type = response.headers.get_content_type()
+                charset = response.headers.get_content_charset() or 'utf-8'
+                
+                # Check if it's text/html or application/json
+                if 'text' not in content_type and 'json' not in content_type:
+                     return ToolResult(call, False, error=f"Unsupported content type: {content_type}. Only text or JSON is supported.")
+                     
+                html = response.read().decode(charset, errors='replace')
+                
+                # Super basic HTML tag removal for a cleaner output
+                import re
+                text = re.sub(r'<style.*?>.*?</style>', '', html, flags=re.DOTALL|re.IGNORECASE)
+                text = re.sub(r'<script.*?>.*?</script>', '', text, flags=re.DOTALL|re.IGNORECASE)
+                text = re.sub(r'<[^>]+>', ' ', text)
+                text = re.sub(r'\s+', ' ', text).strip()
+                
+                max_len = 15000
+                truncated = False
+                if len(text) > max_len:
+                    text = text[:max_len] + "\n...[truncated]"
+                    truncated = True
+                    
+                return ToolResult(call, True, {"url": url, "content": text, "truncated": truncated, "length": len(text)})
+        except HTTPError as e:
+            return ToolResult(call, False, error=f"HTTP Error {e.code}: {e.reason}")
+        except URLError as e:
+            return ToolResult(call, False, error=f"URL Error: {e.reason}")
+        except Exception as e:
+            return ToolResult(call, False, error=f"Failed to fetch content: {str(e)}")
+
+
     def _t_open_url(self, call: ToolCall, a: dict[str, Any]) -> ToolResult:
         url = a.get("url") or a.get("value")
         if not url:
@@ -753,6 +798,7 @@ _ALIASES = {
     "open_application": "open_app", "launch_app": "open_app", "launch": "open_app", "start_app": "open_app", "open_program": "open_app",
     "open": "open_app", "run_app": "open_app", "open_file": "open_app",
     "browse": "open_url", "open_browser": "open_url", "navigate": "open_url",
+    "fetch": "fetch_web_content", "crawl": "fetch_web_content", "get_url": "fetch_web_content",
     "shell": "run_command", "powershell": "run_command", "cmd": "run_command", "execute_command": "run_command",
     "run_shell": "run_command", "bash": "run_command", "exec": "run_command", "run": "run_command",
     "get_windows": "list_windows", "windows": "list_windows", "activate_window": "focus_window", "switch_window": "focus_window",

@@ -182,6 +182,11 @@ TOOLS: list[ToolSpec] = [
         }, ["name"]), category="programs",
     ),
     ToolSpec(
+        name="fetch_web_content",
+        description="Crawl/fetch the raw text content of a web page using a GET request (without opening a browser window). Useful for quickly reading documentation or web search results.",
+        parameters=_obj({"url": {"type": "string", "description": "The URL to fetch."}}, ["url"]), category="programs",
+    ),
+    ToolSpec(
         name="open_url",
         description="Open a URL in the default web browser.",
         parameters=_obj({"url": {"type": "string"}}, ["url"]), category="programs",
