@@ -6,6 +6,7 @@ import json
 from typing import Any
 
 from .config import COORDINATE_SPACES
+from .skills import get_all_skills
 from .tools.definitions import tools_markdown
 
 BASE_PROMPT = """You are WinAgent, an autonomous computer-use assistant that operates a Microsoft Windows PC on behalf of the user.
@@ -25,8 +26,6 @@ and installed programs of THIS machine are listed in the "Environment" section b
    non-Latin text, `type_text` for short text in focused fields.
    
    IMPORTANT - KEYBOARD LANGUAGE: Before using any hotkeys (like ctrl+c, ctrl+v) or typing commands, you MUST ensure the system keyboard layout is set to English. Non-English layouts (like Persian) cause hotkeys and commands to fail completely. If you suspect the layout is not English, press `alt+shift` to switch the layout before proceeding.
-   
-   IMPORTANT - MENU NAVIGATION: When interacting with menus (especially in apps like Blender), use the mouse to hover over or click the MAIN menu options to open them. However, for navigating SUB-MENUS, DO NOT use the mouse to hover or click on the sub-menu items, as moving the mouse often causes them to close. Instead, you MUST leave the mouse cursor where it is, and use the keyboard arrow keys (`up`, `down`, `left`, `right`) to navigate through the sub-menu options, and press `enter` to select.
 
 4. Coordinates: pointer positions and screenshot regions refer to the LAST FULL screenshot you received.
    Use the explicit Coordinate convention section below. Never mix image pixels, normalized units and
@@ -40,9 +39,6 @@ and installed programs of THIS machine are listed in the "Environment" section b
 7. Be economical: batch independent actions when safe (e.g. click then type), avoid needless screenshots, and stop
    when the goal is reached.
    
-   IMPORTANT - BLENDER HOTKEYS: In Blender, instead of clicking icons to move, scale, or rotate objects, ALWAYS use the keyboard hotkeys sequentially using `press_keys`. For example, to scale an object on the X axis by a factor of 2, press `s`, then `x`, then `2`, then `enter` (do NOT type them together as a string like "sx2", use `press_keys` sequentially or if supported, pass the sequence of individual keys). `g` is for move/grab, `s` is for scale, `r` is for rotate. Use the axes `x`, `y`, `z` to constrain movement. This is much more precise than using the mouse.
-
-
    IMPORTANT - AVOID LOOPS: If an action fails, does not produce the expected result after 2-3 attempts, or if you are trying to interact with a button that is disabled/greyed out, DO NOT get stuck repeating the exact same action. You must immediately stop, try a completely alternative method (like a keyboard shortcut), skip that step and move on to the next part of the task, or use `ask_user`.
 
 8. Once you start using tools, finish ONLY with `task_complete` and a non-empty, truthful summary. Use success=false
@@ -216,7 +212,7 @@ def build_system_prompt(*, protocol: str, vision: bool, system_info: dict[str, A
                       "All pointer positions and screenshot regions use actual pixels of the last FULL image "
                       "received before this response. Do NOT return normalized 0-1000 units, percentages or "
                       "Windows logical pixels. The image dimensions are in its description.\n")
-    parts = [BASE_PROMPT, convention]
+    parts = [BASE_PROMPT, get_all_skills(), convention]
     if protocol == "json":
         parts.append(JSON_PROTOCOL_PROMPT + tools_markdown(coordinate_space) + "\n")
     else:
