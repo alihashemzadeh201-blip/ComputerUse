@@ -94,7 +94,7 @@ def test_tool_name_aliases(backend, config):
     res = ex.execute(ToolCall("hotkey", {"keys": "alt+tab"}))
     assert res.ok and res.call.name == "press_keys"
     res = ex.execute(ToolCall("no_such_tool", {}))
-    assert not res.ok and "Unknown tool" in res.error
+    assert not res.ok and "Unknown tool or function" in res.error
 
 
 def test_open_app_and_windows(backend, config):

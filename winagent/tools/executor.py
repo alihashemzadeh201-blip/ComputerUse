@@ -331,7 +331,7 @@ class ToolExecutor:
                 call = ToolCall(name=alias, arguments=call.arguments, id=call.id)
                 spec = TOOLS_BY_NAME[alias]
             else:
-                return ToolResult(call, False, error=f"Unknown tool '{call.name}'. Available: {sorted(TOOLS_BY_NAME)}",
+                return ToolResult(call, False, error=f"Unknown tool or function '{call.name}'. Available tools: {sorted(TOOLS_BY_NAME)}",
                                   duration=time.time() - start)
         try:
             self._check_stop()
