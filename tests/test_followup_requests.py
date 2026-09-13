@@ -76,7 +76,7 @@ def test_followup_keeps_file_context_and_uses_only_the_new_screen(config, backen
         previous = json.loads(messages[-2]["content"])["previous_request"]
         assert previous["status"] == "completed"
         # The filename was chosen by the model, not present in the user's task or final summary.
-        assert str(path) in json.dumps(previous, ensure_ascii=False)
+        assert str(path).replace("\\", "\\\\") in json.dumps(previous, ensure_ascii=False)
         assert "coordinate_mapping" not in json.dumps(previous)
         return turn(protocol, ("write_file", {"path": str(path), "content": "دوم\n", "append": True}))
 
@@ -90,7 +90,7 @@ def test_followup_keeps_file_context_and_uses_only_the_new_screen(config, backen
     assert agent.run(first_task).status == "completed"
     old_frames[:] = shots
     assert agent.run(second_task).status == "completed"
-    assert path.read_text() == "اول\nدوم\n"
+    assert path.read_text(encoding="utf-8") == "اول\nدوم\n"
     assert len(llm.calls) == 4
     if vision:
         assert agent._model_frame is shots[-1] and shots[-1] not in old_frames
